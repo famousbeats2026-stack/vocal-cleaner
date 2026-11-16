@@ -1,0 +1,44 @@
+# Build the Famous Beats Vocal Cleaner plugin on a Mac in the cloud.
+# Push this project to GitHub and this workflow builds the .vst3 and
+# .component files for you — no Xcode needed on your own Mac.
+name: Build macOS plugin
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch: # lets you press "Run workflow" by hand in the Actions tab
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+
+    steps:
+      - name: Check out the project
+        uses: actions/checkout@v4
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.28.x"
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Find the built plugins
+        run: |
+          echo "=== VST3 ==="
+          find build -name "*.vst3" -maxdepth 6
+          echo "=== AU ==="
+          find build -name "*.component" -maxdepth 6
+
+      - name: Upload the plugins
+        uses: actions/upload-artifact@v4
+        with:
+          name: FamousBeatsVocalCleaner-macOS
+          path: |
+            build/FamousBeatsVocalCleaner_artefacts/Release/VST3/*.vst3
+            build/FamousBeatsVocalCleaner_artefacts/Release/AU/*.component
+          if-no-files-found: error
