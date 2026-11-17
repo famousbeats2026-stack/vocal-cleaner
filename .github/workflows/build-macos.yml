@@ -11,6 +11,7 @@ on:
 jobs:
   build-macos:
     runs-on: macos-15
+
     steps:
       - name: Check out the project
         uses: actions/checkout@v4
